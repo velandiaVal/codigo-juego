@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dicey Challenge - Modo Niveles</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body {
+      background: #0d1117;
+      color: #e6edf3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 15px;
+    }
+    .game-card {
+      background: #161b22;
+      padding: 25px;
+      border-radius: 18px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+      border: 1px solid #30363d;
+    }
+    
+    /* Header estilo imagen */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .title-group h1 {
+      margin: 0;
+      color: #d2a8ff;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .title-group p {
+      margin: 3px 0 0 0;
+      color: #8b949e;
+      font-size: 0.8rem;
+    }
+    .meta-badge {
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 8px 14px;
+      text-align: right;
+    }
+    .meta-badge small {
+      color: #8b949e;
+      font-size: 0.65rem;
+      font-weight: 700;
+      display: block;
+      letter-spacing: 0.5px;
+    }
+    .meta-badge span {
+      color: #e3b341;
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+
+    /* Modos / Info Nivel */
+    .level-bar {
+      display: flex;
+      justify-content: space-between;
+      background: #0d1117;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 15px;
+      border: 1px solid #21262d;
+    }
+    .lvl-tag { color: #a5d6ff; font-weight: bold; }
+    .turns-tag { color: #ffa657; font-weight: bold; }
+
+    /* Secciones estilo tarjetas */
+    .section {
+      background: #0d1117;
+      padding: 14px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #21262d;
+    }
+    .step-title {
+      color: #f778ba;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    /* Ruleta */
+    .roulette-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .roulette-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .icon-box {
+      background: #21262d;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 1.2rem;
+    }
+    .roulette-txt {
+      font-size: 0.85rem;
+      color: #e6edf3;
+      font-weight: 600;
+    }
+
+    .btn-orange {
+      background: linear-gradient(180deg, #ff8c00, #e65100);
+      color: #ffffff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+      transition: transform 0.1s, opacity 0.2s;
+      white-space: nowrap;
+    }
+    .btn-orange:hover { transform: scale(1.02); }
+    .btn-orange:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* Dados */
+    .dice-zone {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      min-height: 50px;
+      align-items: center;
+    }
+    .die {
+      width: 48px;
+      height: 48px;
+      background: #21262d;
+      color: #58a6ff;
+      border: 2px solid #30363d;
+      font-size: 1.4rem;
+      font-weight: 800;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .die:hover { border-color: #58a6ff; transform: translateY(-2px); }
+    .die.selected { background: #e3b341; color: #0d1117; border-color: #fff; transform: translateY(-4px); }
+    .die.used { opacity: 0.15; pointer-events: none; }
+
+    /* Desafíos */
+    .btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .btn-challenge {
+      background: #21262d;
+      color: #c9d1d9;
+      border: 1px solid #30363d;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    .btn-challenge strong { display: block; color: #58a6ff; margin-bottom: 2px; }
+    .btn-challenge:hover { background: #30363d; border-color: #58a6ff; }
+
+    .log-msg {
+      font-size: 0.8rem;
+      color: #7ee787;
+      text-align: center;
+      min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="game-card">
+  <!-- Header -->
+  <div class="header">
+    <div class="title-group">
+      <h1>🎲 Dicey Challenge</h1>
+      <p>Combinaciones, patrones y azar</p>
+    </div>
+    <div class="meta-badge">
+      <small id="target-label">META: 40 PTS</small>
+      <span id="score">0</span>
+    </div>
+  </div>
+
+  <!-- Barra de Nivel -->
+  <div class="level-bar">
+    <span class="lvl-tag" id="lvl-tag">Nivel 1</span>
+    <span class="turns-tag">Turnos restantes: <span id="turns">5</span></span>
+  </div>
+
+  <!-- Paso 1 -->
+  <div class="section">
+    <div class="step-title">PASO 1: RULETA DEL DESTINO</div>
+    <div class="roulette-box">
+      <div class="roulette-info">
+        <div class="icon-box">⚙️</div>
+        <div class="roulette-txt" id="roulette-msg">Gira para descubrir tu bonus</div>
+      </div>
+      <button class="btn-orange" id="btn-roll" onclick="girarRuleta()">▶ Girar Ruleta</button>
+    </div>
+  </div>
+
+  <!-- Paso 2 -->
+  <div class="section">
+    <div class="step-title">PASO 2: SELECCIONA DADOS</div>
+    <div class="dice-zone" id="dice-container">
+      <small style="color: #8b949e;">Gira la ruleta primero para obtener tus dados.</small>
+    </div>
+  </div>
+
+  <!-- Paso 3 -->
+  <div class="section">
+    <div class="step-title">PASO 3: RESUELVE UN PATRÓN</div>
+    <div class="btn-grid">
+      <button class="btn-challenge" onclick="resolver('par')">
+        <strong>🛡️ Solo Par</strong>
+        Suma sus puntos
+      </button>
+      <button class="btn-challenge" onclick="resolver('impar')">
+        <strong>⚡ Solo Impar</strong>
+        Suma x1.5 puntos
+      </button>
+      <button class="btn-challenge" onclick="resolver('espejo')">
+        <strong>🪞 Espejo</strong>
+        2 dados iguales x2
+      </button>
+      <button class="btn-challenge" onclick="resolver('escalera')">
+        <strong>📈 Escalera</strong>
+        3 dados seguidos = 25pt
+      </button>
+    </div>
+  </div>
+
+  <div class="log-msg" id="log-msg">¡Listo para jugar! Presiona 'Girar Ruleta'.</div>
+</div>
+
+<script>
+  let nivel = 1;
+  let puntos = 0;
+  let meta = 40;
+  let turnos = 5;
+
+  let dados = [];
+  let seleccionados = [];
+  let yaGiro = false;
+
+  const efectosRuleta = [
+    { txt: "Tiro Limpio", mod: "ninguno" },
+    { txt: "🔥 +1 a todos los dados", mod: "+1" },
+    { txt: "🎲 Dado Dorado Extra", mod: "extra" },
+    { txt: "⚡ Dado más alto x2", mod: "doble" }
+  ];
+
+  function girarRuleta() {
+    if (yaGiro) return;
+
+    let efecto = efectosRuleta[Math.floor(Math.random() * efectosRuleta.length)];
+    document.getElementById('roulette-msg').innerText = efecto.txt;
+
+    let cantDados = (nivel >= 3 ? 5 : 4) + (efecto.mod === "extra" ? 1 : 0);
+    dados = Array.from({length: cantDados}, () => Math.floor(Math.random() * 6) + 1);
+
+    if (efecto.mod === "+1") dados = dados.map(d => Math.min(6, d + 1));
+    if (efecto.mod === "doble") {
+      let max = Math.max(...dados);
+      let idx = dados.indexOf(max);
+      dados[idx] = Math.min(6, dados[idx] * 2);
+    }
+
+    seleccionados = [];
+    yaGiro = true;
+    document.getElementById('btn-roll').disabled = true;
+
+    dibujarDados();
+    document.getElementById('log-msg').innerText = "Selecciona dados para aplicar un patrón.";
+  }
+
+  function dibujarDados() {
+    const cont = document.getElementById('dice-container');
+    cont.innerHTML = '';
+    dados.forEach((val, i) => {
+      let clase = 'die';
+      if (val === 0) clase += ' used';
+      if (seleccionados.includes(i)) clase += ' selected';
+
+      cont.innerHTML += `<div class="${clase}" onclick="seleccionar(${i})">${val || ''}</div>`;
+    });
+  }
+
+  function seleccionar(i) {
+    if (dados[i] === 0) return;
+    if (seleccionados.includes(i)) {
+      seleccionados = seleccionados.filter(idx => idx !== i);
+    } else {
+      seleccionados.push(i);
+    }
+    dibujarDados();
+  }
+
+  function resolver(tipo) {
+    if (seleccionados.length === 0) {
+      document.getElementById('log-msg').innerText = "⚠️ Selecciona dados primero.";
+      return;
+    }
+
+    let valores = seleccionados.map(i => dados[i]).sort((a,b) => a - b);
+    let ganado = 0;
+    let exito = false;
+
+    if (tipo === 'par' && valores.every(v => v % 2 === 0)) {
+      ganado = valores.reduce((a,b) => a + b, 0);
+      exito = true;
+    } else if (tipo === 'impar' && valores.every(v => v % 2 !== 0)) {
+      ganado = Math.round(valores.reduce((a,b) => a + b, 0) * 1.5);
+      exito = true;
+    } else if (tipo === 'espejo' && valores.length === 2 && valores[0] === valores[1]) {
+      ganado = (valores[0] + valores[1]) * 2;
+      exito = true;
+    } else if (tipo === 'escalera' && valores.length === 3 && valores[1] === valores[0]+1 && valores[2] === valores[1]+1) {
+      ganado = 25;
+      exito = true;
+    }
+
+    if (exito) {
+      puntos += ganado;
+      document.getElementById('score').innerText = puntos;
+      document.getElementById('log-msg').innerText = `🎉 ¡Patrón completado! +${ganado} pts.`;
+
+      seleccionados.forEach(i => dados[i] = 0);
+      seleccionados = [];
+      dibujarDados();
+
+      if (puntos >= meta) {
+        subirNivel();
+        return;
+      }
+    } else {
+      document.getElementById('log-msg').innerText = "❌ Los dados no cumplen con ese patrón.";
+    }
+
+    if (dados.every(d => d === 0)) {
+      siguienteTurno();
+    }
+  }
+
+  function siguienteTurno() {
+    turnos--;
+    document.getElementById('turns').innerText = turnos;
+
+    if (turnos <= 0 && puntos < meta) {
+      alert(`💥 ¡Se acabaron los turnos! Llegaste al Nivel ${nivel}.`);
+      reiniciar();
+      return;
+    }
+
+    yaGiro = false;
+    dados = [];
+    seleccionados = [];
+    document.getElementById('btn-roll').disabled = false;
+    document.getElementById('roulette-msg').innerText = "Gira para descubrir tu bonus";
+    document.getElementById('dice-container').innerHTML = '<small style="color: #8b949e;">Gira la ruleta para obtener tus dados.</small>';
+  }
+
+  function subirNivel() {
+    alert(`🌟 ¡NIVEL ${nivel} SUPERADO! Avanzando al siguiente reto...`);
+    nivel++;
+    puntos = 0;
+    meta = meta + (nivel * 20);
+    turnos = Math.max(3, 6 - Math.floor(nivel / 2));
+
+    actualizarUI();
+    yaGiro = false;
+    dados = [];
+    document.getElementById('btn-roll').disabled = false;
+    document.getElementById('roulette-msg').innerText = "Gira para iniciar el nivel";
+    document.getElementById('dice-container').innerHTML = '<small style="color: #8b949e;">Gira la ruleta para obtener tus dados.</small>';
+    document.getElementById('log-msg').innerText = `¡Bienvenido al Nivel ${nivel}!`;
+  }
+
+  function reiniciar() {
+    nivel = 1;
+    puntos = 0;
+    meta = 40;
+    turnos = 5;
+    actualizarUI();
+    yaGiro = false;
+    dados = [];
+    document.getElementById('btn-roll').disabled = false;
+    document.getElementById('roulette-msg').innerText = "Gira para descubrir tu bonus";
+    document.getElementById('dice-container').innerHTML = '<small style="color: #8b949e;">Gira la ruleta para obtener tus dados.</small>';
+  }
+
+  function actualizarUI() {
+    document.getElementById('lvl-tag').innerText = `Nivel ${nivel}`;
+    document.getElementById('score').innerText = puntos;
+    document.getElementById('target-label').innerText = `META: ${meta} PTS`;
+    document.getElementById('turns').innerText = turnos;
+  }
+</script>
+
+</body>
+</html>
